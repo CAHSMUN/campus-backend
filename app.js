@@ -1,5 +1,5 @@
-const dotenv = require('dotenv');
-dotenv.config();
+// const dotenv = require('dotenv');
+// dotenv.config();
 
 const express = require('express');
 var cors = require('cors');
@@ -7,7 +7,7 @@ const app = express();
 const mongoose = require('mongoose');
 
 // dev purposes
-mongoose.set('debug', true);
+// mongoose.set('debug', true);
 
 const authRoute = require('./routes/auth');
 // const delegatesRoute = require('./routes/delegates');
