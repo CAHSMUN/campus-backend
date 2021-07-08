@@ -7,11 +7,11 @@ const app = express();
 const mongoose = require('mongoose');
 
 // dev purposes
-// mongoose.set('debug', true);
+mongoose.set('debug', true);
 
 const authRoute = require('./routes/auth');
 // const delegatesRoute = require('./routes/delegates');
-// const sponsorsRoute = require('./routes/sponsors');
+const sponsorsRoute = require('./routes/sponsors');
 const schoolsRoute = require('./routes/schools');
 const secretariatRoute = require('./routes/secretariat');
 
@@ -28,7 +28,7 @@ app.use(express.json());
 // connect routes
 app.use('/auth', authRoute);
 // app.use('/delegates', delegatesRoute);
-// app.use('/sponsors', sponsorsRoute);
+app.use('/sponsors', sponsorsRoute);
 app.use('/schools', schoolsRoute);
 app.use('/secretariat', secretariatRoute);
 

@@ -115,6 +115,18 @@ router.get('/:id', verify, getSchool, (req, res) => {
     res.json(res.school);
 });
 
+// Get all
+router.get('/', verify, async (req, res) => {
+    try {
+        const schools = await School.find();
+        res.json(schools);
+    } catch (err) {
+        res.status(500).json({
+            message: err.message
+        });
+    }
+});
+
 
 
 
