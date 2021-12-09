@@ -1,5 +1,5 @@
-// const dotenv = require('dotenv');
-// dotenv.config();
+const dotenv = require('dotenv');
+dotenv.config();
 
 const express = require('express');
 var cors = require('cors');
@@ -12,6 +12,7 @@ mongoose.set('debug', true);
 const authRoute = require('./routes/auth');
 // const delegatesRoute = require('./routes/delegates');
 const sponsorsRoute = require('./routes/sponsors');
+const committeesRoute = require('./routes/committees');
 const schoolsRoute = require('./routes/schools');
 const secretariatRoute = require('./routes/secretariat');
 
@@ -29,6 +30,7 @@ app.use(express.json());
 app.use('/auth', authRoute);
 // app.use('/delegates', delegatesRoute);
 app.use('/sponsors', sponsorsRoute);
+app.use('/committees', committeesRoute);
 app.use('/schools', schoolsRoute);
 app.use('/secretariat', secretariatRoute);
 
