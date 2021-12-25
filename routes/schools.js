@@ -127,6 +127,18 @@ router.get('/', verify, async (req, res) => {
     }
 });
 
+// Get all, return only names in array (public route for del reg) 
+router.get('/all/names', async(req, res) => {
+    try {
+        const schools = await School.find().select("name");
+        res.json(schools);
+    } catch (err) {
+        res.status(500).json({
+            message: err.message
+        });
+    }
+})
+
 
 
 
@@ -138,7 +150,7 @@ async function getSchool(req, res, next) {
         school = await School.findById(req.params.id);
         if (school == null) {
             return res.status(404).json({
-                message: `Cannot find customer with id ${req.params.id}`
+                message: `Cannot find school with id ${req.params.id}`
             });
         }
     } catch (err) {

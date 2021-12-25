@@ -18,6 +18,20 @@ router.get('/matrix', async (req, res) => {
 });
 
 
+// For delegate registration page
+// gets all committee (names)
+router.get('/', async (req, res) => {
+    try {
+        const committees = await Committee.find().select("name");
+        res.json(committees);
+    } catch (err) {
+        res.status(500).json({
+            message: err.message
+        });
+    }
+})
+
+
 
 
 // For assigning

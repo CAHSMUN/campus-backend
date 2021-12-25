@@ -10,7 +10,7 @@ const mongoose = require('mongoose');
 mongoose.set('debug', true);
 
 const authRoute = require('./routes/auth');
-// const delegatesRoute = require('./routes/delegates');
+const delegatesRoute = require('./routes/delegates');
 const sponsorsRoute = require('./routes/sponsors');
 const committeesRoute = require('./routes/committees');
 const schoolsRoute = require('./routes/schools');
@@ -28,7 +28,7 @@ app.use(express.json());
 
 // connect routes
 app.use('/auth', authRoute);
-// app.use('/delegates', delegatesRoute);
+app.use('/delegates', delegatesRoute);
 app.use('/sponsors', sponsorsRoute);
 app.use('/committees', committeesRoute);
 app.use('/schools', schoolsRoute);
