@@ -62,7 +62,60 @@ router.post('/register/regular', async (req, res) => {
 // head delegate registration
 router.post('/register/head', async (req, res) => {
 
+    // find delegate
+    
+    let delegate;
+
+    try {
+        delegate = await Delegate.findOne({ email: req.body.email })
+        if (delegate == null) {
+            return res.status(404).json({
+                message: `Cannot find delegate with email ${req.body.email}`
+            });
+        }
+    } catch (err) {
+        return res.status(500).json({
+            message: err.message
+        });
+    }
+
+    res.delegate = delegate
+
     // update delegate of email `req.body.email` with all information (minus email and passcode)
+
+    
+    res.delegate.attendance = req.body.attendance
+    res.delegate.capacity = req.body.capacity
+    res.delegate.firstName = req.body.firstName
+    res.delegate.lastName = req.body.lastName
+    res.delegate.grade = req.body.grade
+    res.delegate.sex = req.body.sex
+    res.delegate.phoneNumber = req.body.phoneNumber
+    res.delegate.postal = req.body.postal
+    res.delegate.refereePosition = req.body.refereePosition
+    res.delegate.refereeName = req.body.refereeName
+    res.delegate.ec_firstName = req.body.ec_firstName
+    res.delegate.ec_lastName = req.body.ec_lastName
+    res.delegate.ec_relationship = req.body.ec_relationship
+    res.delegate.ec_phoneNumber = req.body.ec_phoneNumber
+    res.delegate.prefOneComm = req.body.prefOneComm
+    res.delegate.prefOneCountry = req.body.prefOneCountry
+    res.delegate.prefTwoComm = req.body.prefTwoComm
+    res.delegate.prefTwoCountry = req.body.prefTwoCountry
+    res.delegate.prefThreeComm = req.body.prefThreeComm
+    res.delegate.prefThreeCountry = req.body.prefThreeCountry
+    res.delegate.numPrevConferences = req.body.numPrevConferences
+    res.delegate.pastConferences = req.body.pastConferences
+    res.delegate.signature = req.body.signature
+
+    try {
+        const updatedDelegate = await res.delegate.save();
+        res.json(updatedDelegate)
+    } catch (error) {
+        res.status(400).json({
+            message: err.message
+        })
+    }
 
 })
 
