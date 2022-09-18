@@ -19,6 +19,7 @@ const verify = require('../middleware/tokenVerify');
 const Sponsor = require('../models/Sponsor');
 const School = require('../models/School');
 const Delegate = require('../models/Delegate');
+const sgMail = require('@sendgrid/mail')
 
 // register school
 router.post('/register/:type', async(req, res) => {
@@ -65,7 +66,49 @@ router.post('/register/:type', async(req, res) => {
             
             try {
                 const newSponsor = await sponsor.save();
-                res.status(201).json(newSponsor);
+
+
+
+
+                // Send email of successfully registered school, can log in to view delegates
+
+
+                const MESSAGE = 'You have successfully registered your school for CAHSMUN. Log into campus for more information at campus.cahsmun.org'
+                const SUBJECT = 'CAHSMUN School Registration'
+                
+                sgMail.setApiKey(process.env.SENDGRID_API_KEY || '')
+                const templateId = 'd-04077bfcad034ee98b45be80acd2e17a'
+        
+                const msg = {
+                    from: {
+                        email: 'delegates@cahsmun.org',
+                        name: 'CAHSMUN Campus'
+                    },
+                    personalizations: [
+                        {
+                            to: [
+                                {
+                                    email: newSponsor.email
+                                }
+                            ],
+                            dynamic_template_data: {
+                                subject: SUBJECT,
+                                email_content: MESSAGE
+                            }
+                        },
+                    ],
+                    template_id: templateId
+                }
+        
+                return sgMail
+                    .send(msg)
+                    .then(() => {
+                        return res.status(200).json({ message: 'Email sent'})
+                    })
+                    .catch((error) => {
+                        console.log(error)
+                        return res.status(500).json({ message: error})
+                    })
             } catch (error) {
                 res.status(400).json({
                     message: error.message,
@@ -94,7 +137,48 @@ router.post('/register/:type', async(req, res) => {
             
             try {
                 const newDelegate = await delegate.save();
-                res.status(201).json(newDelegate);
+
+
+
+
+                // Send email of successfully registered school, will need to register as delegate again
+
+                const MESSAGE = 'You have successfully registered your school for CAHSMUN as a head delegate. Log into campus for more information at campus.cahsmun.org. PLEASE NOTE: You must use the same email to register as a Delegate to avoid double registration.'
+                const SUBJECT = 'CAHSMUN School Registration'
+                
+                sgMail.setApiKey(process.env.SENDGRID_API_KEY || '')
+                const templateId = 'd-04077bfcad034ee98b45be80acd2e17a'
+        
+                const msg = {
+                    from: {
+                        email: 'delegates@cahsmun.org',
+                        name: 'CAHSMUN Campus'
+                    },
+                    personalizations: [
+                        {
+                            to: [
+                                {
+                                    email: newDelegate.email
+                                }
+                            ],
+                            dynamic_template_data: {
+                                subject: SUBJECT,
+                                email_content: MESSAGE
+                            }
+                        },
+                    ],
+                    template_id: templateId
+                }
+        
+                return sgMail
+                    .send(msg)
+                    .then(() => {
+                        return res.status(200).json({ message: 'Email sent'})
+                    })
+                    .catch((error) => {
+                        console.log(error)
+                        return res.status(500).json({ message: error})
+                    })
             } catch (error) {
                 res.status(400).json({
                     message: error.message,

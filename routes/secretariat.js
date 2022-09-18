@@ -8,7 +8,34 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const Secretariat = require('../models/Secretariat');
+const Delegate = require('../models/Delegate');
 const verify = require('../middleware/tokenVerify');
+const School = require('../models/School');
+const Committee = require('../models/Committee');
+
+
+// Admin dashboard stats
+router.get('/admin/stats', verify, async (req, res) => {
+    try {
+        const total_delegates = await Delegate.countDocuments() 
+        const total_schools = await School.countDocuments()
+
+        const committees = await Committee.find().select('name countries')
+
+        return res.status(200).json({
+            committees,
+            total_delegates,
+            total_schools,
+            total_delegates_paid: '',
+            total_rooms_finalized: '',
+        })
+    } catch (err) {
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+})
+
 
 // Get One
 router.get('/:id', verify, getSecretariat, (req, res) => {

@@ -2,6 +2,8 @@
 const express = require('express');
 const router = express.Router();
 const Committee = require('../models/Committee');
+const Delegate = require('../models/Delegate');
+const sgMail = require('@sendgrid/mail')
 
 
 
@@ -32,6 +34,24 @@ router.get('/', async (req, res) => {
 })
 
 
+// For secretariat setup screen
+router.post('/add', async (req, res) => {
+    const newCommittee = new Committee({
+        name: req.body.name,
+        countries: []
+    })
+
+    try {
+        const insertedCommittee = await newCommittee.save()
+        return res.status(201).json(insertedCommittee);
+    } catch (error) {
+        return res.status(500).json({
+            message: error
+        })
+    }
+})
+
+
 
 
 // For assigning
@@ -46,7 +66,51 @@ router.post('/assign/:committee_id/:assignment_id/:delegate_id', async (req,res)
             country["assigned"] = req.params.delegate_id;
             doc.save();
         })
-        res.json(res.assignment);
+
+        const delegateInDB = await Delegate.findById(req.params.delegate_id)
+        delegateInDB.assignment = req.params.assignment_id
+        await delegateInDB.save()
+
+        
+
+        // Send email to assigned delegate notifying of their assignment
+
+        const MESSAGE = 'You have been assigned to a country. Log into campus to view at campus.cahsmun.org'
+        const SUBJECT = 'CAHSMUN Delegate Assignment'
+        
+        sgMail.setApiKey(process.env.SENDGRID_API_KEY || '')
+        const templateId = 'd-04077bfcad034ee98b45be80acd2e17a'
+
+        const msg = {
+            from: {
+                email: 'delegates@cahsmun.org',
+                name: 'CAHSMUN Campus'
+            },
+            personalizations: [
+                {
+                    to: [
+                        {
+                            email: delegateInDB.email
+                        }
+                    ],
+                    dynamic_template_data: {
+                        subject: SUBJECT,
+                        email_content: MESSAGE
+                    }
+                },
+            ],
+            template_id: templateId
+        }
+
+        return sgMail
+            .send(msg)
+            .then(() => {
+                return res.status(200).json({ message: 'Email sent'})
+            })
+            .catch((error) => {
+                console.log(error)
+                return res.status(500).json({ message: error})
+            })
     } catch(err) {
         res.status(400).json({
             message: err.message
@@ -54,7 +118,7 @@ router.post('/assign/:committee_id/:assignment_id/:delegate_id', async (req,res)
     }
 })
 
-router.post('/unassign/:committe_id/:assignment_id', async(req, res) => {
+router.post('/unassign/:committee_id/:assignment_id/:delegate_id', async(req, res) => {
 
     try {
         res.assignment = Committee.findById(req.params.committee_id).then(doc => {
@@ -62,6 +126,11 @@ router.post('/unassign/:committe_id/:assignment_id', async(req, res) => {
             country["assigned"] = "";
             doc.save();
         })
+        
+        const delegateInDB = await Delegate.findById(req.params.delegate_id)
+        delegateInDB.assignment = ''
+        await delegateInDB.save()
+
         res.json(res.assignment);
     } catch(err) {
         res.status(400).json({
@@ -71,7 +140,27 @@ router.post('/unassign/:committe_id/:assignment_id', async(req, res) => {
 })
 
 
+router.patch('/edit/:committee_id/countries', async (req, res) => {
+    
+    if(!req.params.committee_id) {
+        return res.status(400).json({
+            message: 'No committee id provided'
+        })
+    }
 
+    const committeeInDB = await Committee.findById(req.params.committee_id)
+
+    committeeInDB.countries = req.body.countries
+
+    try {
+        const editedCommittee = await committeeInDB.save()
+        res.status(200).json(editedCommittee)
+    } catch (error) {
+        return res.status(500).json({
+            message: `Something went wrong while saving new committee: ${JSON.stringify(error)}`
+        })
+    }
+})
 
 
 

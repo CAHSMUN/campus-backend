@@ -13,6 +13,7 @@ const verify = require('../middleware/tokenVerify');
 const Sponsor = require('../models/Sponsor');
 const School = require('../models/School');
 const Delegate = require('../models/Delegate');
+const sgMail = require('@sendgrid/mail')
 
 
 // regular registration
@@ -46,11 +47,50 @@ router.post('/register/regular', async (req, res) => {
         numPrevConferences: req.body.numPrevConferences, 
         pastConferences: req.body.pastConferences, 
         signature: req.body.signature,
+        assignment: ''
     });
 
     try {
         const newDelegate = await delegate.save();
-        res.status(201).json(newDelegate);
+
+
+        // Send email of successfully registered
+        const MESSAGE = 'You have successfully registered for CAHSMUN. Log into campus to view at campus.cahsmun.org'
+        const SUBJECT = 'CAHSMUN Delegate Registration'
+        
+        sgMail.setApiKey(process.env.SENDGRID_API_KEY || '')
+        const templateId = 'd-04077bfcad034ee98b45be80acd2e17a'
+
+        const msg = {
+            from: {
+                email: 'delegates@cahsmun.org',
+                name: 'CAHSMUN Campus'
+            },
+            personalizations: [
+                {
+                    to: [
+                        {
+                            email: newDelegate.email
+                        }
+                    ],
+                    dynamic_template_data: {
+                        subject: SUBJECT,
+                        email_content: MESSAGE
+                    }
+                },
+            ],
+            template_id: templateId
+        }
+
+        return sgMail
+            .send(msg)
+            .then(() => {
+                return res.status(200).json({ message: 'Email sent'})
+            })
+            .catch((error) => {
+                console.log(error)
+                return res.status(500).json({ message: error})
+            })
     } catch (err) {
         res.status(400).json({
             message: err.message,
@@ -107,10 +147,53 @@ router.post('/register/head', async (req, res) => {
     res.delegate.numPrevConferences = req.body.numPrevConferences
     res.delegate.pastConferences = req.body.pastConferences
     res.delegate.signature = req.body.signature
+    res.delegate.assignment = ''
 
     try {
         const updatedDelegate = await res.delegate.save();
-        res.json(updatedDelegate)
+
+
+
+
+        // Send email of successfully registered
+        
+
+        const MESSAGE = 'You have successfully registered for CAHSMUN. Log into campus to view at campus.cahsmun.org'
+        const SUBJECT = 'CAHSMUN Delegate Registration'
+        
+        sgMail.setApiKey(process.env.SENDGRID_API_KEY || '')
+        const templateId = 'd-04077bfcad034ee98b45be80acd2e17a'
+
+        const msg = {
+            from: {
+                email: 'delegates@cahsmun.org',
+                name: 'CAHSMUN Campus'
+            },
+            personalizations: [
+                {
+                    to: [
+                        {
+                            email: updatedDelegate.email
+                        }
+                    ],
+                    dynamic_template_data: {
+                        subject: SUBJECT,
+                        email_content: MESSAGE
+                    }
+                },
+            ],
+            template_id: templateId
+        }
+
+        return sgMail
+            .send(msg)
+            .then(() => {
+                return res.status(200).json({ message: 'Email sent'})
+            })
+            .catch((error) => {
+                console.log(error)
+                return res.status(500).json({ message: error})
+            })
     } catch (error) {
         res.status(400).json({
             message: err.message
@@ -120,6 +203,18 @@ router.post('/register/head', async (req, res) => {
 })
 
 
+
+// Get all delegates with just _id and name returns (secretariat matrix view)
+router.get('/map', verify, async (req, res) => {
+    try {
+        const delegates = await Delegate.find({}, { firstName: 1, lastName: 1 })
+        res.json(delegates);
+    } catch (err) {
+        res.status(500).json({
+            message: err.message
+        });
+    }
+})
 
 // Get all delegates (delegates list screen)
 router.get('/', verify, async (req, res) => {
