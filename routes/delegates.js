@@ -47,6 +47,7 @@ router.post('/register/regular', async (req, res) => {
         numPrevConferences: req.body.numPrevConferences, 
         pastConferences: req.body.pastConferences, 
         signature: req.body.signature,
+        prefReason: req.body.prefReason,
         assignment: ''
     });
 
@@ -147,6 +148,7 @@ router.post('/register/head', async (req, res) => {
     res.delegate.numPrevConferences = req.body.numPrevConferences
     res.delegate.pastConferences = req.body.pastConferences
     res.delegate.signature = req.body.signature
+    res.delegate.prefReason = req.body.prefReason
     res.delegate.assignment = ''
 
     try {
@@ -231,6 +233,19 @@ router.get('/', verify, async (req, res) => {
 // Get one delegate (delegate detail screen)
 router.get('/:id', verify, getDelegate, async (req, res) => {
     res.json(res.delegate);
+})
+
+router.delete('/:id', verify, getDelegate, async(req, res) => {
+    try {
+        await res.delegate.remove();
+        return res.status(200).json({
+            message: 'Deleted successfully'
+        })
+    } catch (err) {
+        res.status(500).json({
+            message: err.message
+        });
+    }
 })
 
 

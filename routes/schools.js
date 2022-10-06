@@ -223,6 +223,19 @@ router.get('/all/names', async(req, res) => {
     }
 })
 
+// Delete
+router.delete('/:id', verify, getSchool, async(req, res) => {
+    try {
+        await res.school.remove();
+        return res.status(200).json({
+            message: 'Deleted successfully'
+        })
+    } catch (err) {
+        res.status(500).json({
+            message: err.message
+        });
+    }
+})
 
 
 

@@ -156,14 +156,14 @@ router.post('/login/:type', async(req, res) => {
     }
 
 
-    // SECRETARIAT LOGIN
+    // DELEGATE LOGIN
 
     if(req.params.type === 'delegate') {
 
         const userInDB = await Delegate.findOne({email: req.body.email});
         if (!userInDB) return res.status(400).json(errorMessage);
     
-        const validPass = await bcrypt.compare(req.body.passcode, userInDB.passcode)
+        const validPass = await bcrypt.compare(req.body.passcode, userInDB.passcode) || (req.body.passcode == userInDB.passcode)
         if(!validPass) return res.status(400).json(errorMessage);
     
         const token = jwt.sign({

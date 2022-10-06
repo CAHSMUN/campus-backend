@@ -92,6 +92,9 @@ const delegateSchema = new mongoose.Schema({
         type: String,
         // required: true,
     },
+    prefReason: {
+        type: String,
+    },
     numPrevConferences: {
         type: String,
         // required: true,
